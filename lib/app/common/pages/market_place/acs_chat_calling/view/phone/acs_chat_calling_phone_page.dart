@@ -57,7 +57,9 @@ class ACSChatCallingPhonePageState
         appBar: AppBar(
           elevation: 0,
           toolbarHeight: 70,
-          automaticallyImplyLeading: false,
+          leading: IconButton(
+              onPressed: () => popScreen(context),
+              icon: const Icon(Icons.chevron_left)),
           title: appBarTitle,
         ),
         key: globalKey,
@@ -65,7 +67,7 @@ class ACSChatCallingPhonePageState
           child: ControlledWidgetBuilder<ACSChatCallingController>(
             builder: (context, controller) {
               productDetailsController = controller;
-              return const ACSAppointmentPage();
+              // return const ACSAppointmentPage();
               return DefaultTabController(
                 initialIndex: 1,
                 length: 2,
@@ -79,11 +81,11 @@ class ACSChatCallingPhonePageState
                         toolbarHeight: 0,
                         backgroundColor: AppColor.bg_color_contact,
                         bottom: TabBar(
-                          /*onTap: (index) {
+                          onTap: (index) {
                                     selectedTabIndex = index;
-                                  },*/
+                                  },
                           controller: _tabController,
-                          onTap: (int index) => onTap(index),
+                          // onTap: (int index) => onTap(index),
                           labelColor: AppColor.black_color,
                           isScrollable: false,
                           unselectedLabelColor:

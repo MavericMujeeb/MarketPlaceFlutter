@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_clean_architecture/flutter_clean_architecture.dart';
 import 'package:intl/intl.dart';
+import 'package:marketplace/app/common/navigation/navigation.dart';
 import 'package:marketplace/app/widgets/custom_text.dart';
 import 'package:marketplace/data/repositories/acs_chat_calling_repositories.dart';
 
@@ -143,9 +144,16 @@ class ACSAppointmentPhonePageState
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 listAppointments,
-                /*vSpacer(spacing_12),
-                customButton(48, Constants.bookAnAppointment,
-                    AppColor.brown_231d18, AppColor.brown_231d18, Colors.white),*/
+                vSpacer(spacing_12),
+                GestureDetector(
+                  onTap: () {
+                    Future.delayed(const Duration(microseconds: 500), () {
+                      navigateToBookingScreen(context);
+                    });
+                  },
+                  child: customButton(48, Constants.bookAnAppointment,
+                      AppColor.brown_231d18, AppColor.brown_231d18, Colors.white),
+                ),
               ],
             ),
           ),

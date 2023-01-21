@@ -149,6 +149,8 @@ class Constants {
   static const String joinMeeting = 'Join Meeting';
   static const String viewDetails = 'View Details';
   static const String noAppointments = 'No Appointments found';
+  static const String selectDate = 'Pick date';
+  static const String pickTimeSlot = 'Pick available timeslot';
 }
 
 

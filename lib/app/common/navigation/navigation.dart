@@ -20,6 +20,10 @@ void navigateToContactCernterScreen(context) {
   Navigator.of(context).pushNamed(Pages.screen_contact_center);
 }
 
+void navigateToBookingScreen(context) {
+  Navigator.of(context).pushNamed(Pages.screen_booking);
+}
+
 void navigateToProductIntegrationProcessScreen(context, String strAppName) {
   Navigator.of(context)
       .pushNamed(Pages.screen_product_integration_process, arguments: {"appName": strAppName});

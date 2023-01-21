@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:marketplace/app/common/navigation/pages.dart';
+import 'package:marketplace/app/common/pages/market_place/acs_booking/view/acs_booking_page.dart';
 import 'package:marketplace/app/common/pages/market_place/acs_chat_calling/view/acs_chat_calling_page.dart';
 import 'package:marketplace/app/common/pages/market_place/dashboard/view/dashboard_page.dart';
 import 'package:marketplace/app/common/pages/market_place/product_details/view/phone/product_details_phone_page.dart';
@@ -23,6 +24,8 @@ class GlobalRouter {
         return _buildRoute(settings, DashboardPage(title: '', selectedTabIndex: 0,));
       case Pages.screen_contact_center:
         return _buildRoute(settings, ACSChatCallingPage());
+      case Pages.screen_booking:
+        return _buildRoute(settings, ACSBookingPage());
       default:
         return _buildRoute(settings, DashboardPage(title: '', selectedTabIndex: 0,));
     }

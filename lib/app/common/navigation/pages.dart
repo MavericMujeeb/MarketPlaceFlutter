@@ -7,5 +7,6 @@ class Pages {
   static const String screen_product_detail = '/screen_product_detail';
   static const String screen_product_integration_process = '/screen_product_integration_progress';
   static const String screen_contact_center = '/screen_contact_center';
+  static const String screen_booking = '/screen_booking';
 
 }
