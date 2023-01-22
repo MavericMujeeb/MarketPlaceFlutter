@@ -140,6 +140,7 @@ class Constants {
   // Contact Center screen..
   static const String contactCenter = 'Contact Center';
   static const String contactCenterToolbarMsg = 'Contact your private baker or manage appointment';
+  static const String contactCenterToolbarMsgPrivateBanker = 'Contact your private baker';
   static const String tabContact = 'Contact';
   static const String tabAppointment = 'Appointments';
   static const String yourPrivateBanker = 'Your private banker';
@@ -151,6 +152,7 @@ class Constants {
   static const String noAppointments = 'No Appointments found';
   static const String selectDate = 'Pick date';
   static const String pickTimeSlot = 'Pick available timeslot';
+  static const String pickDate = 'Pick date';
 }
 
 
