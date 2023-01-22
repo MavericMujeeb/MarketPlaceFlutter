@@ -31,6 +31,8 @@ class ACSBookingPhonePageState
 
   static const Channel = MethodChannel('com.citi.marketplace.host');
 
+  DateTime setDate = DateTime.now();
+
   int selectedTabIndex = 0;
 
   static const MARGIN_TOP = 10.0;
@@ -48,12 +50,10 @@ class ACSBookingPhonePageState
   static const spacing_16 = 16.0;
   static const spacing_18 = 18.0;
 
-  final List<int> _list = List.generate(10, (i) => i);
   final List<bool> _selected = List.generate(10, (i) => false);
 
   @override
   Widget get view => Scaffold(
-        // backgroundColor: Colors.white70,
         appBar: AppBar(
           elevation: 0,
           toolbarHeight: 70,
@@ -67,52 +67,22 @@ class ACSBookingPhonePageState
           child: ControlledWidgetBuilder<ACSBookingController>(
             builder: (context, controller) {
               productDetailsController = controller;
-              return Column(
-                children: [
-                  // horizontalDivider,
-                  bookingContact,
-                ],
-              );
+              return bookingContent;
             },
           ),
         ),
       );
 
-  Widget get bookingContact => Expanded(
+  Widget get bookingContent => Expanded(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(spacing_14),
+            padding: const EdgeInsets.all(spacing_12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                // contactsItemCell,
-                vSpacer(spacing_12),
-                GestureDetector(
-                  onTap: () async {
-                    DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        // firstDate: DateTime(1950),
-                        firstDate: DateTime.now(),
-                        //DateTime.now() - not to allow to choose before today.
-                        lastDate: DateTime(2100));
-
-                    if (pickedDate != null) {
-                      // print(pickedDate); //pickedDate output format => 2021-03-10 00:00:00.000
-                      String formattedDate =
-                          DateFormat('dd-MM-yyyy').format(pickedDate);
-                      // print(formattedDate); //formatted date output using intl package =>  2021-03-16
-                      showToast(formattedDate);
-                    } else {}
-                  },
-                  child: customButton(
-                      const Icon(null, size: 0),
-                      Constants.selectDate,
-                      Colors.white,
-                      AppColor.brown_231d18,
-                      AppColor.brown_231d18),
-                ),
-                containerSlot(),
+                containerPickDate(),
+                vSpacer(spacing_10),
+                containerPickTimeSlot(),
                 vSpacer(spacing_12),
                 GestureDetector(
                   onTap: () {},
@@ -134,12 +104,35 @@ class ACSBookingPhonePageState
       content: Text(s.toString()),
     );
 
-    // Find the ScaffoldMessenger in the widget tree
-    // and use it to show a SnackBar.
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  Widget containerSlot() => Card(
+  Widget containerPickDate() => Card(
+    color: Colors.white,
+    elevation: 3,
+    shadowColor: Colors.black,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          contentTitle(Constants.pickDate),
+          vSpacer(10),
+          CalendarDatePicker(initialDate: setDate, firstDate: DateTime.now(), lastDate: DateTime.now().add(Duration(days: 100000)), onDateChanged: (DateTime value) {
+            String formattedDate =
+            DateFormat('dd-MM-yyyy').format(value);
+            // print(formattedDate); //formatted date output using intl package =>  2021-03-16
+            showToast(formattedDate);
+          }),
+        ],
+      ),
+    ),
+  );
+
+  Widget containerPickTimeSlot() => Card(
         color: Colors.white,
         elevation: 3,
         shadowColor: Colors.black,
@@ -151,27 +144,31 @@ class ACSBookingPhonePageState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-                child: CustomText(
-                  textName: Constants.pickTimeSlot,
-                  textAlign: TextAlign.start,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
+              contentTitle(Constants.pickTimeSlot),
               vSpacer(10),
-              ListView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: 10,
-                  itemBuilder: (BuildContext context, int index) {
-                    return slotCellItem(index);
-                  }),
+              listSlots(),
             ],
           ),
         ),
       );
+
+  Widget contentTitle(String strLabel) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+    child: CustomText(
+      textName: strLabel,
+      textAlign: TextAlign.start,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+    ),
+  );
+
+  Widget listSlots() => ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: 10,
+      itemBuilder: (BuildContext context, int index) {
+        return slotCellItem(index);
+      });
 
   Widget slotCellItem(int index) => GestureDetector(
         onTap: () => {
@@ -182,13 +179,14 @@ class ACSBookingPhonePageState
         child: Card(
           color: _selected[index] ? AppColor.brown_231d18 : Colors.white,
           elevation: 2.0,
+          margin: EdgeInsets.only(top: spacing_10),
           shadowColor: Colors.black,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(
-                horizontal: spacing_8, vertical: spacing_8),
+                horizontal: spacing_6, vertical: spacing_6),
             child: CustomText(
               textName: '01:45 PM - 02:45 PM',
               textAlign: TextAlign.center,
@@ -211,7 +209,7 @@ class ACSBookingPhonePageState
           ),
           vSpacer(10),
           CustomText(
-            textName: Constants.contactCenterToolbarMsg,
+            textName: Constants.contactCenterToolbarMsgPrivateBanker,
             textAlign: TextAlign.center,
             fontSize: 11,
             fontWeight: FontWeight.w500,
