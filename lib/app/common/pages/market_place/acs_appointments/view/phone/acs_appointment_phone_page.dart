@@ -261,10 +261,8 @@ class ACSAppointmentPhonePageState
 
     print("Token is : " + acsToken);*/
     // acsToken = AppSharedPreference().getString(key: SharedPrefKey.prefs_acs_token);
-    // print("Token is : " + acsToken);
 
     acsToken = await AppSharedPreference().getString(key: SharedPrefKey.prefs_acs_token);
-    print("Token is : " + acsToken);
     resp = await getAppointmentsAPI();
 
     print("Response for get appointment is : " + resp.toString());
