@@ -7,6 +7,7 @@ import 'package:flutter_clean_architecture/flutter_clean_architecture.dart';
 import 'package:intl/intl.dart';
 import 'package:marketplace/app/common/navigation/navigation.dart';
 import 'package:marketplace/app/widgets/custom_text.dart';
+import 'package:marketplace/data/helpers/shared_preferences.dart';
 import 'package:marketplace/data/repositories/acs_chat_calling_repositories.dart';
 
 import '../../../../../utils/constants.dart';
@@ -80,13 +81,6 @@ class ACSAppointmentPhonePageState
           'This is a Toast from From Flutter to Android Native Code Yes, It is working'
     });
     print(batteryLevel);
-  }*/
-
-  /*@override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    getAppointments();
   }*/
 
   @override
@@ -251,7 +245,7 @@ class ACSAppointmentPhonePageState
       );
 
   Future getToken() async {
-    var url = Uri.parse(
+    /*var url = Uri.parse(
         'https://login.microsoftonline.com/4c4985fe-ce8e-4c2f-97e6-b037850b777d/oauth2/v2.0/token');
     final response = await http.post(url, body: {
       'client_id': '10114ce6-840d-419b-917e-49b90f3c1f2a',
@@ -265,8 +259,12 @@ class ACSAppointmentPhonePageState
     print("Response token is : " + respToken['access_token']);
     acsToken = respToken['access_token'];
 
-    print("Token is : " + acsToken);
+    print("Token is : " + acsToken);*/
+    // acsToken = AppSharedPreference().getString(key: SharedPrefKey.prefs_acs_token);
+    // print("Token is : " + acsToken);
 
+    acsToken = await AppSharedPreference().getString(key: SharedPrefKey.prefs_acs_token);
+    print("Token is : " + acsToken);
     resp = await getAppointmentsAPI();
 
     print("Response for get appointment is : " + resp.toString());
