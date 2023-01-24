@@ -27,11 +27,12 @@ class ACSBookingPhonePage extends View {
 }
 
 class ACSBookingPhonePageState
-    extends ViewState<ACSBookingPhonePage, ACSBookingController> {
-  ACSBookingPhonePageState()
-      : super(ACSBookingController(ACSChatCallingDataRepository()));
+    // extends ViewState<ACSBookingPhonePage, ACSBookingController> {
+    extends State<ACSBookingPhonePage> {
+  // ACSBookingPhonePageState(): super(ACSBookingController(ACSChatCallingDataRepository()));
+  // ACSBookingPhonePageState();
 
-  ACSBookingController? acsBookingController;
+  ACSBookingController? acsBookingController = ACSBookingController(ACSChatCallingDataRepository());
 
   static const Channel = MethodChannel('com.citi.marketplace.host');
 
@@ -56,7 +57,7 @@ class ACSBookingPhonePageState
 
   final List<bool> _selected = List.generate(10, (i) => false);
 
-  var resp;
+  // var resp;
   var respBooking;
   var ascToken = '';
   var serviceId = '';
@@ -64,7 +65,7 @@ class ACSBookingPhonePageState
 
   int selectedDayIndex = 0;
 
-  bool inProgress = false;
+  // bool inProgress = false;
 
   @override
   void initState() {
@@ -75,6 +76,22 @@ class ACSBookingPhonePageState
     // DateTime date = new DateTime(today.year, today.month, today.day);
 
     // getAwailableSlots(today.weekday - 1);
+
+    print("Check fro controller : "+acsBookingController.toString());
+
+    // acsBookingController?.getAwailableSlots(today.weekday - 1);
+    /*setState(() {
+
+    });*/
+
+    getAppoinments(today.weekday - 1);
+  }
+
+  getAppoinments(int weekday) async{
+    await acsBookingController?.getAwailableSlots(weekday);
+    setState(() {
+
+    });
   }
 
   @override
@@ -87,41 +104,41 @@ class ACSBookingPhonePageState
               icon: const Icon(Icons.chevron_left)),
           title: appBarTitle,
         ),
-        key: globalKey,
+        // key: globalKey,
         body: SafeArea(
-          child: ControlledWidgetBuilder<ACSBookingController>(
+          child: bookingContent,
+          /*child: ControlledWidgetBuilder<ACSBookingController>(
             builder: (context, controller) {
-              acsBookingController = controller;
+              // acsBookingController = controller;
+              print("Check for controller in view : "+acsBookingController.toString());
               return bookingContent;
             },
-          ),
+          ),*/
         ),
       );
 
   Widget get bookingContent => Stack(
         children: [
           Positioned(
-            child: Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(spacing_12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      containerPickDate(),
-                      vSpacer(spacing_10),
-                      containerPickTimeSlot(),
-                      vSpacer(spacing_12),
-                      bottomBookingButton(),
-                    ],
-                  ),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(spacing_12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    containerPickDate(),
+                    vSpacer(spacing_10),
+                    containerPickTimeSlot(),
+                    vSpacer(spacing_12),
+                    bottomBookingButton(),
+                  ],
                 ),
               ),
             ),
           ),
           Positioned(
             child: Visibility(
-              visible: inProgress ? true : false,
+              visible: acsBookingController!.inProgress ? true : false,
               child: Container(
                 height: double.infinity,
                 width: double.infinity,
@@ -182,10 +199,12 @@ class ACSBookingPhonePageState
                     /*showToast(
                         formattedDate, formattedDay, value.weekday.toString());*/
                     selectedDayIndex = value.weekday - 1;
-                    acsBookingController?.getAwailableSlots(selectedDayIndex);
+
+                    // acsBookingController?.getAwailableSlots(selectedDayIndex);
+                    getAppoinments(selectedDayIndex);
 
                     print("SelectedDayIndex : "+selectedDayIndex.toString());
-                    print("Length is : "+ resp['value'][0]['workingHours'][selectedDayIndex]['timeSlots'].length.toString());
+                    print("Length is : "+ acsBookingController!.resp['value'][0]['workingHours'][selectedDayIndex]['timeSlots'].length.toString());
 
                   }),
             ],
@@ -207,11 +226,29 @@ class ACSBookingPhonePageState
             children: [
               contentTitle(Constants.pickTimeSlot),
               vSpacer(10),
-              FutureBuilder(
-                future: getAwailableSlots(today.weekday - 1),
+              acsBookingController!.inProgress ? SizedBox(
+                height: 100,
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ) : acsBookingController!.resp != null && acsBookingController!.resp['value'][0]['workingHours'][selectedDayIndex]['timeSlots']
+                  .length > 0
+                  ? listSlots()
+                  : SizedBox(
+                height: 100,
+                child: Center(
+                  child: CustomText(
+                      textName: Constants.noAppointments,
+                      textAlign: TextAlign.center,
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal),
+                ),
+              ),
+              /*FutureBuilder(
+                future: acsBookingController!.getAwailableSlots(today.weekday - 1),
                 builder: (buildContext, snapShot) {
                   return snapShot.hasData
-                      ? resp != null && resp['value'][0]['workingHours'][selectedDayIndex]['timeSlots']
+                      ? acsBookingController!.resp != null && acsBookingController!.resp['value'][0]['workingHours'][selectedDayIndex]['timeSlots']
                       .length > 0
                           ? listSlots()
                           : SizedBox(
@@ -231,7 +268,7 @@ class ACSBookingPhonePageState
                           ),
                         );
                 },
-              ),
+              ),*/
               // listSlots(),
             ],
           ),
@@ -252,7 +289,7 @@ class ACSBookingPhonePageState
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       // itemCount: 10,
-      itemCount: resp['value'][0]['workingHours'][selectedDayIndex]['timeSlots']
+      itemCount: acsBookingController!.resp['value'][0]['workingHours'][selectedDayIndex]['timeSlots']
           .length,
       itemBuilder: (BuildContext context, int index) {
         return slotCellItem(index);
@@ -346,7 +383,7 @@ class ACSBookingPhonePageState
         ),
       );
 
-  Future getAwailableSlots(int dayOfWeek) async {
+ /* Future getAwailableSlots(int dayOfWeek) async {
     // inProgress = true;
     ascToken = await AppSharedPreference()
         .getString(key: SharedPrefKey.prefs_acs_token);
@@ -360,12 +397,12 @@ class ACSBookingPhonePageState
 
     inProgress = false;
 
-    /*print("Default day start timeslot is : " +
+    *//*print("Default day start timeslot is : " +
         resp['value'][0]['workingHours'][dayOfWeek]['timeSlots'][0]['startTime']
             .toString());
     print("Default day end timeslot is : " +
         resp['value'][0]['workingHours'][dayOfWeek]['timeSlots'][0]['endTime']
-            .toString());*/
+            .toString());*//*
 
     return true;
   }
@@ -378,13 +415,13 @@ class ACSBookingPhonePageState
 
     var convertDataToJson = jsonDecode(response.body);
     return convertDataToJson;
-  }
+  }*/
 
   displayTimeSlot(int index) {
-    var respStartTime = resp['value'][0]['workingHours'][selectedDayIndex]
+    var respStartTime = acsBookingController!.resp['value'][0]['workingHours'][selectedDayIndex]
             ['timeSlots'][index]['startTime']
         .toString();
-    var respEndTime = resp['value'][0]['workingHours'][selectedDayIndex]
+    var respEndTime = acsBookingController!.resp['value'][0]['workingHours'][selectedDayIndex]
             ['timeSlots'][index]['endTime']
         .toString();
 
@@ -406,7 +443,7 @@ class ACSBookingPhonePageState
     respBooking = await bookAppointAPI();
     print("Response for Book an Appointment is: " + respBooking.toString());
 
-    inProgress = false;
+    // inProgress = false;
 
     return true;
   }
@@ -545,5 +582,11 @@ class ACSBookingPhonePageState
 
     var convertDataToJson = jsonDecode(response.body);
     return convertDataToJson;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return view;
   }
 }

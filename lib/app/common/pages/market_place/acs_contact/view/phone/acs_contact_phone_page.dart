@@ -93,55 +93,53 @@ class ACSContactPhonePageState
         ),
       );
 
-  Widget get contentContact => Expanded(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(spacing_14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                contactsItemCell,
-                vSpacer(spacing_12),
-                GestureDetector(
-                  onTap: () {
-                    Future.delayed(const Duration(microseconds: 500), () {
-                      navigateToBookingScreen(context);
-                    });
-                  },
-                  child: customButton(
-                      const Icon(null, size: 0),
-                      Constants.bookAnAppointment,
-                      AppColor.brown_231d18,
-                      AppColor.brown_231d18,
-                      Colors.white),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    joinCallClick();
-                  },
-                  child: customButton(
-                      Icon(Icons.chat, size: 16, color: AppColor.brown_231d18),
-                      Constants.sendMessage,
-                      AppColor.bg_color_contact,
-                      AppColor.brown_231d18,
-                      AppColor.brown_231d18),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    chatClick();
-                  },
-                  child: customButton(
-                      Icon(Icons.call, size: 16, color: AppColor.brown_231d18),
-                      Constants.startVideoOrAudioCall,
-                      AppColor.bg_color_contact,
-                      AppColor.brown_231d18,
-                      AppColor.brown_231d18),
-                ),
-              ],
-            ),
+  Widget get contentContact => SingleChildScrollView(
+    child: Padding(
+      padding: const EdgeInsets.all(spacing_14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          contactsItemCell,
+          vSpacer(spacing_12),
+          GestureDetector(
+            onTap: () {
+              Future.delayed(const Duration(microseconds: 500), () {
+                navigateToBookingScreen(context);
+              });
+            },
+            child: customButton(
+                const Icon(null, size: 0),
+                Constants.bookAnAppointment,
+                AppColor.brown_231d18,
+                AppColor.brown_231d18,
+                Colors.white),
           ),
-        ),
-      );
+          GestureDetector(
+            onTap: () {
+              joinCallClick();
+            },
+            child: customButton(
+                Icon(Icons.chat, size: 16, color: AppColor.brown_231d18),
+                Constants.sendMessage,
+                AppColor.bg_color_contact,
+                AppColor.brown_231d18,
+                AppColor.brown_231d18),
+          ),
+          GestureDetector(
+            onTap: () {
+              chatClick();
+            },
+            child: customButton(
+                Icon(Icons.call, size: 16, color: AppColor.brown_231d18),
+                Constants.startVideoOrAudioCall,
+                AppColor.bg_color_contact,
+                AppColor.brown_231d18,
+                AppColor.brown_231d18),
+          ),
+        ],
+      ),
+    ),
+  );
 
   Widget get horizontalDivider => Container(
         height: 0.5,
