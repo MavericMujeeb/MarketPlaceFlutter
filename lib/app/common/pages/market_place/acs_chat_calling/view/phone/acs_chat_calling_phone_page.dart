@@ -69,7 +69,7 @@ class ACSChatCallingPhonePageState
           child: ControlledWidgetBuilder<ACSChatCallingController>(
             builder: (context, controller) {
               productDetailsController = controller;
-              // return const ACSAppointmentPage();
+              return const ACSAppointmentPage();
               return DefaultTabController(
                 initialIndex: 1,
                 length: 2,
