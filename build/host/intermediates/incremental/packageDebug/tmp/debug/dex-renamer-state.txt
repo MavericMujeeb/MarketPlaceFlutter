@@ -1,0 +1,4 @@
+#Tue Jan 24 13:31:25 IST 2023
+base.0=/Users/kishanms/AndroidStudioProjects/CITI MAV/Repo/MarketPlaceFlutter/build/host/intermediates/dex/debug/mergeDexDebug/classes.dex
+renamed.0=classes.dex
+path.0=classes.dex

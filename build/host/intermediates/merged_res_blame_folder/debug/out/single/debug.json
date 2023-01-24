@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "/Users/kishanms/AndroidStudioProjects/CITI MAV/Repo/MarketPlaceFlutter/build/host/intermediates/res/merged/debug/drawable_launch_background.xml.flat",
+        "source": "/Users/kishanms/AndroidStudioProjects/CITI MAV/Repo/MarketPlaceFlutter/android/app/src/main/res/drawable/launch_background.xml"
+    },
+    {
+        "merged": "/Users/kishanms/AndroidStudioProjects/CITI MAV/Repo/MarketPlaceFlutter/build/host/intermediates/res/merged/debug/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "/Users/kishanms/AndroidStudioProjects/CITI MAV/Repo/MarketPlaceFlutter/android/app/src/main/res/mipmap-hdpi/ic_launcher.png"
+    }
+]
