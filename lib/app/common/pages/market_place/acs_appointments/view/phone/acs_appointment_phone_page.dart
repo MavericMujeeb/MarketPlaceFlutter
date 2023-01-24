@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_clean_architecture/flutter_clean_architecture.dart';
+import 'package:get/utils.dart';
 import 'package:intl/intl.dart';
 import 'package:marketplace/app/common/navigation/navigation.dart';
 import 'package:marketplace/app/widgets/custom_text.dart';
@@ -106,7 +107,7 @@ class ACSAppointmentPhonePageState
                     future: getToken(),
                     builder: (buildContext, snapShot) {
                       return snapShot.hasData
-                          ? resp != null && resp['value'].length > 0
+                          ? resp != null && resp['value']!=null && resp['value'].length > 0
                               ? appointmentContent
                               : Expanded(
                                   child: Center(
@@ -241,6 +242,8 @@ class ACSAppointmentPhonePageState
       );
 
   Future getToken() async {
+    serviceId = await AppSharedPreference()
+        .getString(key: SharedPrefKey.prefs_service_id);
     var url = Uri.parse(
         'https://login.microsoftonline.com/4c4985fe-ce8e-4c2f-97e6-b037850b777d/oauth2/v2.0/token');
     final response = await http.post(url, body: {
@@ -271,12 +274,22 @@ class ACSAppointmentPhonePageState
   Future getAppointmentsAPI() async {
     var nowDate = DateTime.now();
     var thirtydaysDate = DateTime(nowDate.year, nowDate.month, nowDate.day + 31);
-    String currentDate = nowDate.toString();
-    String oneMonthDate = thirtydaysDate.toString();
+    var format = DateFormat('yyyy-MM-dd');
+    var timeformat = DateFormat('HH:mm');
+    String currentDate = format.format(nowDate);
+    String oneMonthDate = format.format(thirtydaysDate);
+    String currentTime = timeformat.format(nowDate);
+    String finalstartDate = "${currentDate}T$currentTime:00-08:00";
+    String finalendDate = "${oneMonthDate}T00:00:00-08:00";
+    // print(currentDate);
+    // print(oneMonthDate);
+    // print(currentTime);
+    // print(finalstartDate);
+    // print(finalendDate);
     var url = Uri.parse(
-        // 'https://graph.microsoft.com/v1.0/users/$serviceId/calendar/calendarView?startDateTime=$currentDate&endDateTime=$oneMonthDate');
+        'https://graph.microsoft.com/v1.0/users/$serviceId/calendar/calendarView?startDateTime=$finalstartDate&endDateTime=$finalendDate');
         // 'https://graph.microsoft.com/v1.0/users/GatesFamilyOffice@27r4l5.onmicrosoft.com/calendar/calendarView?startDateTime=2023-01-17T00:00:00-08:00&endDateTime=2023-01-19T19:00:00-08:00');
-        'https://graph.microsoft.com/v1.0/users/kishan@27r4l5.onmicrosoft.com/calendar/calendarView?startDateTime=2023-01-17T00:00:00-08:00&endDateTime=2023-01-19T19:00:00-08:00');
+       // 'https://graph.microsoft.com/v1.0/users/kishan@27r4l5.onmicrosoft.com/calendar/calendarView?startDateTime=2023-01-22T13:45:00-08:00&endDateTime=2023-02-24T00:00:00-08:00');
     print("URL->"+url.toString());
     final response =
         await http.get(url, headers: {"Authorization": "Bearer " + acsToken});
