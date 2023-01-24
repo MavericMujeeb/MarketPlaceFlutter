@@ -270,8 +270,13 @@ class ACSAppointmentPhonePageState
   }
 
   Future getAppointmentsAPI() async {
+    var nowDate = DateTime.now();
+    var thirtydaysDate = DateTime(nowDate.year, nowDate.month, nowDate.day + 31);
+    String currentDate = nowDate.toString();
+    String oneMonthDate = thirtydaysDate.toString();
     var url = Uri.parse(
-        'https://graph.microsoft.com/v1.0/users/kishan@27r4l5.onmicrosoft.com/calendar/calendarView?startDateTime=2023-01-17T00:00:00-08:00&endDateTime=2023-01-19T19:00:00-08:00');
+        'https://graph.microsoft.com/v1.0/users/GatesFamilyOffice@27r4l5.onmicrosoft.com/calendar/calendarView?startDateTime=$currentDate&endDateTime=$oneMonthDate');
+    print("URL->"+url.toString());
     final response =
         await http.get(url, headers: {"Authorization": "Bearer " + acsToken});
 
