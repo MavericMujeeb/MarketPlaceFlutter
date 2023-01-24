@@ -131,29 +131,27 @@ class ACSAppointmentPhonePageState
         ),
       );
 
-  Widget get appointmentContent => Expanded(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(spacing_14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                listAppointments,
-                vSpacer(spacing_12),
-                GestureDetector(
-                  onTap: () {
-                    Future.delayed(const Duration(microseconds: 500), () {
-                      navigateToBookingScreen(context);
-                    });
-                  },
-                  child: customButton(48, Constants.bookAnAppointment,
-                      AppColor.brown_231d18, AppColor.brown_231d18, Colors.white),
-                ),
-              ],
-            ),
+  Widget get appointmentContent => SingleChildScrollView(
+    child: Padding(
+      padding: const EdgeInsets.all(spacing_14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          listAppointments,
+          vSpacer(spacing_12),
+          GestureDetector(
+            onTap: () {
+              Future.delayed(const Duration(microseconds: 500), () {
+                navigateToBookingScreen(context);
+              });
+            },
+            child: customButton(48, Constants.bookAnAppointment,
+                AppColor.brown_231d18, AppColor.brown_231d18, Colors.white),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 
   Widget get horizontalDivider => Container(
         height: 0.5,
