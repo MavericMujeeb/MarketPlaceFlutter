@@ -22,46 +22,12 @@ class ACSBookingController extends BaseController {
 
 
   ACSBookingController(super.repo) {
-    similarApps = [
-      ProductDao(Resources.money_quotient_img, 'Money Quotient',
-          '#1 in wealth', 'New','',[]),
-      ProductDao(Resources.advisor_metrix_img, 'Advisor metrix',
-          '#2 in wealth', 'Popular','',[]),
-      ProductDao(Resources.blackrock_img, 'Black rock', '#3 in wealth', 'New','',[]),
-    ];
-  }
-  ProductDao productAddepar = ProductDao(
-      Resources.addaper_icon_img,
-      'Addepar',
-      'Estimate your customer\'s ability to repay the loans with DN Scoring app',
-      'POPULAR',
-      'In the world of financial advice, speed, clarity and foresight aren\'t just nice to have,'
-          'they\'re a necessity. '
-          'Yet tools are insufficient: wealth management firms need more productivity, scale and reach to remain competitive.'
-          ' And  client  exceptions are raising, as people demand a more genuine, more human relationship from those they do business with',
-      ['A complete view of your clients\' wealth',
-        'Portfolio access with ease',
-        'Increase operational efficiency',
-        'Portfolio Trading and re balancing',
-        'Scenario Modeling and Forecasting',
-        'Streamlined Billing, Plus Calculation Insights']);
 
-
-  Color getStatusTextColor(String dataStatus) {
-
-    return (dataStatus == Constants.popular_camel_case)
-        ? const Color(0xFFC99700)
-        : const Color(0xFF006E0A);
-  }
-
-  Color getStatusContainerColor(String dataStatus) {
-    return (dataStatus == Constants.popular_camel_case)
-        ? const Color(0xFFFFE166)
-        : const Color(0xFFEBFFED);
   }
 
   Future getAwailableSlots(int dayOfWeek) async {
-    // inProgress = true;
+    inProgress = true;
+
     acsToken = await await AppSharedPreference()
         .getString(key: SharedPrefKey.prefs_acs_token);
     print("Token from sharedPrefs is : " + acsToken.toString());
@@ -71,13 +37,7 @@ class ACSBookingController extends BaseController {
     print("Response for available slots is: " + resp.toString());
 
     inProgress = false;
-
-    /*print("Default day start timeslot is : " +
-        resp['value'][0]['workingHours'][dayOfWeek]['timeSlots'][0]['startTime']
-            .toString());
-    print("Default day end timeslot is : " +
-        resp['value'][0]['workingHours'][dayOfWeek]['timeSlots'][0]['endTime']
-            .toString());*/
+    // refreshUI();
 
     return true;
   }
