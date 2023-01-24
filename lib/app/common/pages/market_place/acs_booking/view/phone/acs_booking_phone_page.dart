@@ -520,7 +520,7 @@ class ACSBookingPhonePageState
 
     return strStartTime + " - " + strEndTime;
   }
-  
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
