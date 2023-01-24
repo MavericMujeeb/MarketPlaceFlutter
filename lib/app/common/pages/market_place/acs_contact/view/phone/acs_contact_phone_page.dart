@@ -53,7 +53,6 @@ class ACSContactPhonePageState
       'message':
           'This is a Toast from From Flutter to Android Native Code Yes, It is working'
     });
-    print(batteryLevel);
   }
 
   Future<void> joinCallClick() async {
@@ -62,7 +61,6 @@ class ACSContactPhonePageState
       'message':
           'This is a Toast from From Flutter to Android Native Code Yes, It is working'
     });
-    print(batteryLevel);
   }
 
   Future<void> chatClick() async {
@@ -71,7 +69,6 @@ class ACSContactPhonePageState
       'message':
           'This is a Toast from From Flutter to Android Native Code Yes, It is working'
     });
-    print(batteryLevel);
   }
 
   @override

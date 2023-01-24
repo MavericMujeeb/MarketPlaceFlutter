@@ -83,7 +83,6 @@ class ACSBookingPhonePageState
 
     // getAwailableSlots(today.weekday - 1);
 
-    print("Check fro controller : " + acsBookingController.toString());
 
     // acsBookingController?.getAwailableSlots(today.weekday - 1);
     /*setState(() {
@@ -124,7 +123,6 @@ class ACSBookingPhonePageState
     var parts = timeslots[0].split('-');
     acsBookingController!.pickedStartTime = parts[0].trim();
     acsBookingController!.pickedEndTime = parts[1].trim();
-    print("Length for timeslots is : " + timeslots.length.toString());
 
     setState(() {});
   }
@@ -410,7 +408,6 @@ class ACSBookingPhonePageState
 
   Widget slotCellItem(int index) => GestureDetector(
         onTap: () => {
-          print('Clicked on index: $index'),
           for (int i = 0; i < 10; i++) {setState(() => _selected[i] = false)},
           setState(() => _selected[index] = true),
           splitTime = timeslots[0].split('-'),

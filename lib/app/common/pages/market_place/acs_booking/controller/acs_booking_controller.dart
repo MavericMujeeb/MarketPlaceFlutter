@@ -41,8 +41,6 @@ class ACSBookingController extends BaseController {
         .getString(key: SharedPrefKey.prefs_acs_token);
 
     respGetBanker = await getBankersListAPI();
-    print("Response for available bankers list API is : " +
-        respGetBanker.toString());
 
     inProgress = false;
 
@@ -60,11 +58,8 @@ class ACSBookingController extends BaseController {
         .getString(key: SharedPrefKey.prefs_acs_token);
     serviceId = await AppSharedPreference()
         .getString(key: SharedPrefKey.prefs_service_id);
-    print("Token from sharedPrefs is : " + acsToken.toString());
-    print("Day of week is : " + dayOfWeek.toString());
 
     resp = await getAwailableSlotsAPI(date);
-    print("Response for available slots is: " + resp.toString());
 
     inProgress = false;
     // refreshUI();

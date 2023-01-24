@@ -54,9 +54,9 @@ class ACSAppointmentPhonePageState
   var acsToken = '';
   var serviceId = '';
 
-  Future<void> joinCallClick(meetingLink) async {
+  Future<void> joinCallClick(meetingLink, username) async {
     final bool status = await Channel.invokeMethod(
-        'joinCallClick', <String, String>{'meeting_id': meetingLink});
+        'joinCallClick', <String, String>{'meeting_id': meetingLink, 'user_name': username});
   }
 
   /*Future<void> startCallClick() async {
@@ -217,7 +217,8 @@ class ACSAppointmentPhonePageState
                     GestureDetector(
                         onTap: () {
                           joinCallClick(
-                              resp['value'][index]['onlineMeeting']['joinUrl']);
+                              resp['value'][index]['onlineMeeting']['joinUrl'],
+                              resp['value'][index]['attendees'].length >0 ? resp['value'][index]['attendees'][0]['emailAddress']['name'].toString() : "No Name");
                         },
                         child: customButton(
                             40,
@@ -255,10 +256,8 @@ class ACSAppointmentPhonePageState
 
     var respToken = jsonDecode(response.body);
 
-    print("Response token is : " + respToken['access_token']);
     acsToken = respToken['access_token'];
 
-    print("Token is : " + acsToken);
     // acsToken = AppSharedPreference().getString(key: SharedPrefKey.prefs_acs_token);
     AppSharedPreference()
         .addString(key: SharedPrefKey.prefs_acs_token, value: acsToken);
@@ -267,7 +266,6 @@ class ACSAppointmentPhonePageState
 
     resp = await getAppointmentsAPI();
 
-    print("Response for get appointment is : " + resp.toString());
     return true;
   }
 
@@ -307,8 +305,7 @@ class ACSAppointmentPhonePageState
     var strDate = formatter_display_date.format(tempDateTime);
     var strTime = formatter_display_time.format(tempDateTime.toLocal());
     var strTimeZone = resp['value'][index]['start']['timeZone'].toString();
-    var strBankerName =
-        resp['value'][index]['attendees'][0]['emailAddress']['name'].toString();
+    var strBankerName = resp['value'][index]['attendees'].length >0 ? resp['value'][index]['attendees'][0]['emailAddress']['name'].toString() : "No Name";
 
     var strResponse = strDate +
         ' at ' +
