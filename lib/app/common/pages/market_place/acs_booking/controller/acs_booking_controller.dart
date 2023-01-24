@@ -15,6 +15,7 @@ class ACSBookingController extends BaseController {
 
   var resp;
   var acsToken;
+  var serviceId = '';
 
   int selectedDayIndex = 0;
 
@@ -64,6 +65,8 @@ class ACSBookingController extends BaseController {
     // inProgress = true;
     acsToken = await await AppSharedPreference()
         .getString(key: SharedPrefKey.prefs_acs_token);
+    serviceId = await await AppSharedPreference()
+        .getString(key: SharedPrefKey.prefs_service_id);
     print("Token from sharedPrefs is : " + acsToken.toString());
     print("Day of week is : " + dayOfWeek.toString());
 
@@ -84,7 +87,7 @@ class ACSBookingController extends BaseController {
 
   Future getAwailableSlotsAPI() async {
     var url = Uri.parse(
-        'https://graph.microsoft.com/v1.0/solutions/bookingBusinesses/GatesFamilyOffice@27r4l5.onmicrosoft.com/staffMembers/');
+        'https://graph.microsoft.com/v1.0/solutions/bookingBusinesses/$serviceId/staffMembers/');
     final response =
     await http.get(url, headers: {"Authorization": "Bearer " + acsToken});
 

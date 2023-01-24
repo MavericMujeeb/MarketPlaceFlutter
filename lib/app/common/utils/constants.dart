@@ -34,6 +34,7 @@ class Strings {
 class SharedPrefKey {
   static const String pref_key_integrated_apps = 'pref_key_integrated_apps';
   static const String prefs_acs_token = 'prefs_acs_token';
+  static const String prefs_service_id = 'prefs_service_id';
   static const int page_count = 0;
 }
 
