@@ -53,7 +53,8 @@ class ACSAppointmentPhonePageState
   var acsToken = '';
 
   Future<void> joinCallClick(meetingLink) async {
-    final bool status = await Channel.invokeMethod('joinCallClick', <String, String>{'meeting_id': meetingLink});
+    final bool status = await Channel.invokeMethod(
+        'joinCallClick', <String, String>{'meeting_id': meetingLink});
   }
 
   /*Future<void> startCallClick() async {
@@ -130,27 +131,24 @@ class ACSAppointmentPhonePageState
         ),
       );
 
-  Widget get appointmentContent => SingleChildScrollView(
-    child: Padding(
-      padding: const EdgeInsets.all(spacing_14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          listAppointments,
-          vSpacer(spacing_12),
-          GestureDetector(
-            onTap: () {
-              Future.delayed(const Duration(microseconds: 500), () {
-                navigateToBookingScreen(context);
-              });
-            },
-            child: customButton(48, Constants.bookAnAppointment,
-                AppColor.brown_231d18, AppColor.brown_231d18, Colors.white),
-          ),
-        ],
-      ),
-    ),
-  );
+  Widget get appointmentContent => Expanded(
+        child: Stack(
+          children: [
+            Positioned(top: 14, left:14, right: 14, bottom:80, child: listAppointments),
+            Positioned(
+                left:14.0, right: 14.0, bottom:0,
+                child: GestureDetector(
+              onTap: () {
+                Future.delayed(const Duration(microseconds: 500), () {
+                  navigateToBookingScreen(context);
+                });
+              },
+              child: customButton(48, Constants.bookAnAppointment,
+                  AppColor.brown_231d18, AppColor.brown_231d18, Colors.white),
+            )),
+          ],
+        ),
+      );
 
   Widget get horizontalDivider => Container(
         height: 0.5,
@@ -160,8 +158,6 @@ class ACSAppointmentPhonePageState
       );
 
   Widget get listAppointments => ListView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
       itemCount: resp['value'].length,
       itemBuilder: (BuildContext context, int index) {
         return appointmentCellItem(index);
@@ -218,7 +214,8 @@ class ACSAppointmentPhonePageState
                     ),
                     GestureDetector(
                         onTap: () {
-                          joinCallClick(resp['value'][index]['onlineMeeting']['joinUrl']);
+                          joinCallClick(
+                              resp['value'][index]['onlineMeeting']['joinUrl']);
                         },
                         child: customButton(
                             40,
@@ -243,7 +240,7 @@ class ACSAppointmentPhonePageState
       );
 
   Future getToken() async {
-    /*var url = Uri.parse(
+    var url = Uri.parse(
         'https://login.microsoftonline.com/4c4985fe-ce8e-4c2f-97e6-b037850b777d/oauth2/v2.0/token');
     final response = await http.post(url, body: {
       'client_id': '10114ce6-840d-419b-917e-49b90f3c1f2a',
@@ -257,10 +254,12 @@ class ACSAppointmentPhonePageState
     print("Response token is : " + respToken['access_token']);
     acsToken = respToken['access_token'];
 
-    print("Token is : " + acsToken);*/
+    print("Token is : " + acsToken);
     // acsToken = AppSharedPreference().getString(key: SharedPrefKey.prefs_acs_token);
+    AppSharedPreference()
+        .addString(key: SharedPrefKey.prefs_acs_token, value: acsToken);
 
-    acsToken = await AppSharedPreference().getString(key: SharedPrefKey.prefs_acs_token);
+    // acsToken = await AppSharedPreference().getString(key: SharedPrefKey.prefs_acs_token);
     resp = await getAppointmentsAPI();
 
     print("Response for get appointment is : " + resp.toString());

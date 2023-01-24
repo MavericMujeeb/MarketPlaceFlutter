@@ -32,7 +32,8 @@ class ACSBookingPhonePageState
   // ACSBookingPhonePageState(): super(ACSBookingController(ACSChatCallingDataRepository()));
   // ACSBookingPhonePageState();
 
-  ACSBookingController? acsBookingController = ACSBookingController(ACSChatCallingDataRepository());
+  ACSBookingController? acsBookingController =
+      ACSBookingController(ACSChatCallingDataRepository());
 
   static const Channel = MethodChannel('com.citi.marketplace.host');
 
@@ -55,16 +56,21 @@ class ACSBookingPhonePageState
   static const spacing_16 = 16.0;
   static const spacing_18 = 18.0;
 
-  final List<bool> _selected = List.generate(10, (i) => false);
+  final List<bool> _selected = List.generate(100, (i) => false);
+  // late final List<bool> _selected;
+  late final List<bool> _selectedBanker;
 
   // var resp;
-  var respBooking;
+  // var respBooking;
   var ascToken = '';
   DateTime today = new DateTime.now();
 
   int selectedDayIndex = 0;
 
   // bool inProgress = false;
+
+  List<String> timeslots = [];
+  var splitTime;
 
   @override
   void initState() {
@@ -76,21 +82,56 @@ class ACSBookingPhonePageState
 
     // getAwailableSlots(today.weekday - 1);
 
-    print("Check fro controller : "+acsBookingController.toString());
+    print("Check fro controller : " + acsBookingController.toString());
 
     // acsBookingController?.getAwailableSlots(today.weekday - 1);
     /*setState(() {
 
     });*/
 
-    getAppoinments(today.weekday - 1);
+    getBankersList();
+    // getAppoinments(today.weekday - 1);
   }
 
-  getAppoinments(int weekday) async{
-    await acsBookingController?.getAwailableSlots(weekday);
-    setState(() {
+  void getBankersList() async {
+    await acsBookingController?.getBankersList();
+    _selectedBanker = List.generate(
+        acsBookingController!.respGetBanker['value'].length, (i) => false);
+    _selectedBanker[0] = true;
+    acsBookingController!.selectedBankerEmailId = acsBookingController!
+        .respGetBanker['value'][0]['emailAddress']
+        .toString();
+    acsBookingController!.selectedBankerId = acsBookingController!
+        .respGetBanker['value'][0]['id']
+        .toString();
 
-    });
+    String formattedDate = DateFormat('yyyy-MM-dd').format(today);
+    acsBookingController!.defaultDate = formattedDate;
+    getAppoinments(today.weekday - 1, formattedDate);
+
+    setState(() {});
+  }
+
+  getAppoinments(int weekday, String date) async {
+    await acsBookingController?.getAwailableSlots(weekday, date);
+    // _selected = List.generate(timeslots.length, (i) => false);
+    _selected[0] = true;
+
+    timeslots = acsBookingController!
+        .getTimeSlotsToDisplay("08:00:00.0000000", "17:00:00.0000000");
+
+    var parts = timeslots[0].split('-');
+    acsBookingController!.pickedStartTime = parts[0].trim();
+    acsBookingController!.pickedEndTime = parts[1].trim();
+    print("Length for timeslots is : " + timeslots.length.toString());
+
+    setState(() {});
+  }
+
+  bookAnAppointment() async {
+    await acsBookingController!.actionBookAppointment();
+    setState(() {});
+    popScreen(context);
   }
 
   @override
@@ -125,6 +166,8 @@ class ACSBookingPhonePageState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
+                    containerBankerList(),
+                    vSpacer(spacing_12),
                     containerPickDate(),
                     vSpacer(spacing_10),
                     containerPickTimeSlot(),
@@ -137,7 +180,8 @@ class ACSBookingPhonePageState
           ),
           Positioned(
             child: Visibility(
-              visible: acsBookingController!.inProgress ? true : false,
+              visible:
+                  acsBookingController!.inProgressFullScreen ? true : false,
               child: Container(
                 height: double.infinity,
                 width: double.infinity,
@@ -157,13 +201,12 @@ class ACSBookingPhonePageState
     );
 
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-    // getAwailableSlots();
   }
 
   Widget bottomBookingButton() => GestureDetector(
         onTap: () {
-          actionBookAppointment();
+          bookAnAppointment();
+          setState(() {});
         },
         child: customButton(
             const Icon(null, size: 0),
@@ -192,21 +235,112 @@ class ACSBookingPhonePageState
                   firstDate: DateTime.now(),
                   lastDate: DateTime.now().add(Duration(days: 100000)),
                   onDateChanged: (DateTime value) {
-                    /*String formattedDate =
-                        DateFormat('dd-MM-yyyy').format(value);
-                    String formattedDay = DateFormat('EEEE').format(value);*/
-                    /*showToast(
-                        formattedDate, formattedDay, value.weekday.toString());*/
                     selectedDayIndex = value.weekday - 1;
 
-                    // acsBookingController?.getAwailableSlots(selectedDayIndex);
-                    getAppoinments(selectedDayIndex);
+                    String formattedDate =
+                        DateFormat('yyyy-MM-dd').format(value);
 
-                    print("SelectedDayIndex : "+selectedDayIndex.toString());
-                    print("Length is : "+ acsBookingController!.resp['value'][0]['workingHours'][selectedDayIndex]['timeSlots'].length.toString());
+                    // _selected.clear();
+                    // _selected = List.generate(acsBookingController!.resp['value'][0]['availabilityView'].length, (i) => false);
 
+                    acsBookingController!.defaultDate = formattedDate;
+
+                    getAppoinments(selectedDayIndex, formattedDate);
+                    setState(() {});
                   }),
             ],
+          ),
+        ),
+      );
+
+  Widget containerBankerList() => acsBookingController!.respGetBanker != null &&
+          acsBookingController!.respGetBanker['value'].length > 0
+      ? listBankers()
+      : SizedBox(
+          height: 100,
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+
+  Widget listBankers() => ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      // itemCount: 10,
+      itemCount: acsBookingController!.respGetBanker['value'].length,
+      itemBuilder: (BuildContext context, int index) {
+        return bankerListCell(index);
+      });
+
+  Widget bankerListCell(int index) => GestureDetector(
+        onTap: () {
+          for (int i = 0; i < _selectedBanker.length; i++) {
+            _selectedBanker[i] = false;
+          }
+          _selectedBanker[index] = true;
+          acsBookingController!.selectedBankerEmailId = acsBookingController!
+              .respGetBanker['value'][index]['emailAddress']
+              .toString();
+          acsBookingController!.selectedBankerId = acsBookingController!
+              .respGetBanker['value'][index]['id']
+              .toString();
+
+          getAppoinments(today.weekday - 1, acsBookingController!.defaultDate);
+          setState(() {});
+        },
+        child: Card(
+          color: Colors.white,
+          elevation: 2.0,
+          shadowColor: Colors.black,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(spacing_14),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(40.0),
+                      child: Image.asset(
+                        Resources.banker_img,
+                        height: 40.0,
+                        width: 40.0,
+                        fit: BoxFit.fill,
+                      ),
+                    ),
+                    hSpacer(spacing_12),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomText(
+                            textName: acsBookingController!
+                                .respGetBanker['value'][index]['displayName']
+                                .toString(),
+                            textAlign: TextAlign.start,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w300),
+                        vSpacer(spacing_4),
+                        CustomText(
+                            textName: 'Available',
+                            textAlign: TextAlign.start,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w200),
+                      ],
+                    ),
+                  ],
+                ),
+                Icon(
+                  _selectedBanker[index]
+                      ? Icons.check_circle_rounded
+                      : Icons.radio_button_unchecked_rounded,
+                  color: _selectedBanker[index] ? Colors.green : Colors.black,
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -225,49 +359,28 @@ class ACSBookingPhonePageState
             children: [
               contentTitle(Constants.pickTimeSlot),
               vSpacer(10),
-              acsBookingController!.inProgress ? SizedBox(
-                height: 100,
-                child: const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ) : acsBookingController!.resp != null && acsBookingController!.resp['value'][0]['workingHours'][selectedDayIndex]['timeSlots']
-                  .length > 0
-                  ? listSlots()
-                  : SizedBox(
-                height: 100,
-                child: Center(
-                  child: CustomText(
-                      textName: Constants.noAppointments,
-                      textAlign: TextAlign.center,
-                      fontSize: 14,
-                      fontWeight: FontWeight.normal),
-                ),
-              ),
-              /*FutureBuilder(
-                future: acsBookingController!.getAwailableSlots(today.weekday - 1),
-                builder: (buildContext, snapShot) {
-                  return snapShot.hasData
-                      ? acsBookingController!.resp != null && acsBookingController!.resp['value'][0]['workingHours'][selectedDayIndex]['timeSlots']
-                      .length > 0
-                          ? listSlots()
-                          : SizedBox(
-                              height: 100,
-                              child: Center(
-                                child: CustomText(
-                                    textName: Constants.noAppointments,
-                                    textAlign: TextAlign.center,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.normal),
-                              ),
-                            )
+              acsBookingController!.inProgress
+                  ? SizedBox(
+                      height: 100,
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : acsBookingController!.resp != null &&
+                          acsBookingController!
+                                  .resp['value'][0]['availabilityView'].length >
+                              0
+                      ? listSlots()
                       : SizedBox(
                           height: 100,
-                          child: const Center(
-                            child: CircularProgressIndicator(),
+                          child: Center(
+                            child: CustomText(
+                                textName: Constants.noAppointments,
+                                textAlign: TextAlign.center,
+                                fontSize: 14,
+                                fontWeight: FontWeight.normal),
                           ),
-                        );
-                },
-              ),*/
+                        ),
               // listSlots(),
             ],
           ),
@@ -288,8 +401,8 @@ class ACSBookingPhonePageState
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       // itemCount: 10,
-      itemCount: acsBookingController!.resp['value'][0]['workingHours'][selectedDayIndex]['timeSlots']
-          .length,
+      // itemCount: acsBookingController!.resp['value'][0]['availabilityView'].toString().length,
+      itemCount: timeslots.length,
       itemBuilder: (BuildContext context, int index) {
         return slotCellItem(index);
       });
@@ -298,7 +411,10 @@ class ACSBookingPhonePageState
         onTap: () => {
           print('Clicked on index: $index'),
           for (int i = 0; i < 10; i++) {setState(() => _selected[i] = false)},
-          setState(() => _selected[index] = true)
+          setState(() => _selected[index] = true),
+          splitTime = timeslots[0].split('-'),
+          acsBookingController!.pickedStartTime = splitTime[0].trim(),
+          acsBookingController!.pickedEndTime = splitTime[1].trim(),
         },
         child: Card(
           color: _selected[index] ? AppColor.brown_231d18 : Colors.white,
@@ -313,7 +429,8 @@ class ACSBookingPhonePageState
                 horizontal: spacing_6, vertical: spacing_6),
             child: CustomText(
               // textName: '01:45 PM - 02:45 PM',
-              textName: displayTimeSlot(index),
+              textName: timeslots[index],
+              // textName: displayTimeSlot(index),
               textAlign: TextAlign.center,
               fontSize: 14,
               fontWeight: FontWeight.w300,
@@ -382,44 +499,12 @@ class ACSBookingPhonePageState
         ),
       );
 
- /* Future getAwailableSlots(int dayOfWeek) async {
-    // inProgress = true;
-    ascToken = await await AppSharedPreference()
-        .getString(key: SharedPrefKey.prefs_acs_token);
-    print("Token from sharedPrefs is : " + ascToken.toString());
-    print("Day of week is : " + dayOfWeek.toString());
-
-    resp = await getAwailableSlotsAPI();
-    print("Response for available slots is: " + resp.toString());
-
-    inProgress = false;
-
-    *//*print("Default day start timeslot is : " +
-        resp['value'][0]['workingHours'][dayOfWeek]['timeSlots'][0]['startTime']
-            .toString());
-    print("Default day end timeslot is : " +
-        resp['value'][0]['workingHours'][dayOfWeek]['timeSlots'][0]['endTime']
-            .toString());*//*
-
-    return true;
-  }
-
-  Future getAwailableSlotsAPI() async {
-    var url = Uri.parse(
-        'https://graph.microsoft.com/v1.0/solutions/bookingBusinesses/GatesFamilyOffice@27r4l5.onmicrosoft.com/staffMembers/');
-    final response =
-        await http.get(url, headers: {"Authorization": "Bearer " + ascToken});
-
-    var convertDataToJson = jsonDecode(response.body);
-    return convertDataToJson;
-  }*/
-
   displayTimeSlot(int index) {
-    var respStartTime = acsBookingController!.resp['value'][0]['workingHours'][selectedDayIndex]
-            ['timeSlots'][index]['startTime']
+    var respStartTime = acsBookingController!.resp['value'][0]['workingHours']
+            [selectedDayIndex]['timeSlots'][index]['startTime']
         .toString();
-    var respEndTime = acsBookingController!.resp['value'][0]['workingHours'][selectedDayIndex]
-            ['timeSlots'][index]['endTime']
+    var respEndTime = acsBookingController!.resp['value'][0]['workingHours']
+            [selectedDayIndex]['timeSlots'][index]['endTime']
         .toString();
 
     DateFormat formatter_display_time = DateFormat('hh:mm a');
@@ -433,152 +518,6 @@ class ACSBookingPhonePageState
     var strEndTime = formatter_display_time.format(tempEndTimeFormat);
 
     return strStartTime + " - " + strEndTime;
-  }
-
-  Future actionBookAppointment() async{
-
-    respBooking = await bookAppointAPI();
-    print("Response for Book an Appointment is: " + respBooking.toString());
-
-    // inProgress = false;
-
-    return true;
-  }
-
-  Future bookAppointAPI() async {
-    final body = {
-      "@odata.type": "#microsoft.graph.bookingAppointment",
-      "customerTimeZone": "America/Chicago",
-      "smsNotificationsEnabled": false,
-      "endDateTime": {
-        "@odata.type": "#microsoft.graph.dateTimeTimeZone",
-        "dateTime": "2023-01-21T20:30:00.0000000+00:00",
-        "timeZone": "UTC"
-      },
-      "isLocationOnline": true,
-      "optOutOfCustomerEmail": false,
-      "anonymousJoinWebUrl": null,
-      "postBuffer": "PT10M",
-      "preBuffer": "PT5M",
-      "price": 10.0,
-      "priceType@odata.type": "#microsoft.graph.bookingPriceType",
-      "priceType": "fixedPrice",
-      "reminders@odata.type": "#Collection(microsoft.graph.bookingReminder)",
-      "reminders": [
-        {
-          "@odata.type": "#microsoft.graph.bookingReminder",
-          "message": "This service is tomorrow",
-          "offset": "P1D",
-          "recipients@odata.type": "#microsoft.graph.bookingReminderRecipients",
-          "recipients": "allAttendees"
-        },
-        {
-          "@odata.type": "#microsoft.graph.bookingReminder",
-          "message": "Please be available to enjoy your lunch service.",
-          "offset": "PT1H",
-          "recipients@odata.type": "#microsoft.graph.bookingReminderRecipients",
-          "recipients": "customer"
-        },
-        {
-          "@odata.type": "#microsoft.graph.bookingReminder",
-          "message": "Please check traffic for next cater.",
-          "offset": "PT2H",
-          "recipients@odata.type": "#microsoft.graph.bookingReminderRecipients",
-          "recipients": "staff"
-        }
-      ],
-      "serviceId": "555c5745-57a6-4bb4-8c5f-1c5f99a21b60",
-      "serviceLocation": {
-        "@odata.type": "#microsoft.graph.location",
-        "address": {
-          "@odata.type": "#microsoft.graph.physicalAddress",
-          "city": "Irving",
-          "countryOrRegion": "USA",
-          "postalCode": "75035",
-          "postOfficeBox": null,
-          "state": "TX",
-          "street": "6400 Las Colinas Blvd",
-          "type@odata.type": "#microsoft.graph.physicalAddressType",
-          "type": null
-        },
-        "coordinates": null,
-        "displayName": "Citi office",
-        "locationEmailAddress": null,
-        "locationType@odata.type": "#microsoft.graph.locationType",
-        "locationType": null,
-        "locationUri": null,
-        "uniqueId": null,
-        "uniqueIdType@odata.type": "#microsoft.graph.locationUniqueIdType",
-        "uniqueIdType": null
-      },
-      "serviceName": "Document Sharing",
-      "serviceNotes": "Customer requires punctual service.",
-      "startDateTime": {
-        "@odata.type": "#microsoft.graph.dateTimeTimeZone",
-        "dateTime": "2023-01-21T20:00:00.0000000+00:00",
-        "timeZone": "UTC"
-      },
-      "maximumAttendeesCount": 5,
-      "filledAttendeesCount": 1,
-      "customers@odata.type": "#Collection(microsoft.graph.bookingCustomerInformation)",
-      "customers": [
-        {
-          "@odata.type": "#microsoft.graph.bookingCustomerInformation",
-          "customerId": "7ed53fa5-9ef2-4f2f-975b-27447440bc09",
-          "name": "Melinda Gates",
-          "emailAddress": "acharya.83@gmail.com",
-          "phone": "862-228-7032",
-          "notes": null,
-          "location": {
-            "@odata.type": "#microsoft.graph.location",
-            "displayName": "Customer",
-            "locationEmailAddress": null,
-            "locationUri": "",
-            "locationType": null,
-            "uniqueId": null,
-            "uniqueIdType": null,
-            "address": {
-              "@odata.type": "#microsoft.graph.physicalAddress",
-              "street": "",
-              "city": "",
-              "state": "",
-              "countryOrRegion": "",
-              "postalCode": ""
-            },
-            "coordinates": {
-              "altitude": null,
-              "latitude": null,
-              "longitude": null,
-              "accuracy": null,
-              "altitudeAccuracy": null
-            }
-          },
-          "timeZone":"America/Chicago",
-          "customQuestionAnswers": [
-            {
-              "questionId": "3bc6fde0-4ad3-445d-ab17-0fc15dba0774",
-              "question": "API create appointment?",
-              "answerInputType": "text",
-              "answerOptions": [],
-              "isRequired": true,
-              "answer": "25",
-              "selectedOptions": []
-            }
-          ]
-        }
-      ]
-    };
-
-    final requestString = json.encode(body);
-
-    var url = Uri.parse(
-        'https://graph.microsoft.com/v1.0/solutions/bookingBusinesses/GatesFamilyOffice@27r4l5.onmicrosoft.com/appointments');
-    final response =
-    await http.post(url, headers: {"Authorization": "Bearer " + ascToken, "Content-Type": "application/json"}, body: requestString);
-    // print("Response code is : "+response.statusCode.toString());
-
-    var convertDataToJson = jsonDecode(response.body);
-    return convertDataToJson;
   }
 
   @override
