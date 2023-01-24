@@ -348,9 +348,9 @@ class ACSBookingPhonePageState
 
   Future getAwailableSlots(int dayOfWeek) async {
     // inProgress = true;
-    ascToken = await await AppSharedPreference()
+    ascToken = await AppSharedPreference()
         .getString(key: SharedPrefKey.prefs_acs_token);
-    serviceId = await await AppSharedPreference()
+    serviceId = await AppSharedPreference()
         .getString(key: SharedPrefKey.prefs_service_id);
     print("Token from sharedPrefs is : " + ascToken.toString());
     print("Day of week is : " + dayOfWeek.toString());
