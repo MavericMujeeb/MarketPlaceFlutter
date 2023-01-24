@@ -51,6 +51,7 @@ class ACSAppointmentPhonePageState
   var resp;
 
   var acsToken = '';
+  var serviceId = '';
 
   Future<void> joinCallClick(meetingLink) async {
     final bool status = await Channel.invokeMethod('joinCallClick', <String, String>{'meeting_id': meetingLink});
@@ -263,6 +264,7 @@ class ACSAppointmentPhonePageState
     // acsToken = AppSharedPreference().getString(key: SharedPrefKey.prefs_acs_token);
 
     acsToken = await AppSharedPreference().getString(key: SharedPrefKey.prefs_acs_token);
+    serviceId = await AppSharedPreference().getString(key: SharedPrefKey.prefs_service_id);
     resp = await getAppointmentsAPI();
 
     print("Response for get appointment is : " + resp.toString());
@@ -275,7 +277,7 @@ class ACSAppointmentPhonePageState
     String currentDate = nowDate.toString();
     String oneMonthDate = thirtydaysDate.toString();
     var url = Uri.parse(
-        'https://graph.microsoft.com/v1.0/users/GatesFamilyOffice@27r4l5.onmicrosoft.com/calendar/calendarView?startDateTime=$currentDate&endDateTime=$oneMonthDate');
+        'https://graph.microsoft.com/v1.0/users/$serviceId/calendar/calendarView?startDateTime=$currentDate&endDateTime=$oneMonthDate');
     print("URL->"+url.toString());
     final response =
         await http.get(url, headers: {"Authorization": "Bearer " + acsToken});

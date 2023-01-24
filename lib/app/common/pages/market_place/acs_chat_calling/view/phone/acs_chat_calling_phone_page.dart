@@ -44,6 +44,7 @@ class ACSChatCallingPhonePageState
     // TODO: implement initState
     _tabController = TabController(length: 2, vsync: this);
     super.initState();
+    setServiceId();
     getToken();
   }
 
@@ -183,6 +184,10 @@ class ACSChatCallingPhonePageState
     var resp = await getTokenAPI();
     print("Response for get token is : " + resp.toString());
     AppSharedPreference().addString(key:SharedPrefKey.prefs_acs_token, value: resp['access_token']);
+  }
+
+  void setServiceId() async{
+    AppSharedPreference().addString(key:SharedPrefKey.prefs_service_id, value: 'GatesFamilyOffice@27r4l5.onmicrosoft.com');
   }
 
   void onTap(int index) {

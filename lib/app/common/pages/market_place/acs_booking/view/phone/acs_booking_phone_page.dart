@@ -59,6 +59,7 @@ class ACSBookingPhonePageState
   var resp;
   var respBooking;
   var ascToken = '';
+  var serviceId = '';
   DateTime today = new DateTime.now();
 
   int selectedDayIndex = 0;
@@ -349,6 +350,8 @@ class ACSBookingPhonePageState
     // inProgress = true;
     ascToken = await await AppSharedPreference()
         .getString(key: SharedPrefKey.prefs_acs_token);
+    serviceId = await await AppSharedPreference()
+        .getString(key: SharedPrefKey.prefs_service_id);
     print("Token from sharedPrefs is : " + ascToken.toString());
     print("Day of week is : " + dayOfWeek.toString());
 
@@ -369,7 +372,7 @@ class ACSBookingPhonePageState
 
   Future getAwailableSlotsAPI() async {
     var url = Uri.parse(
-        'https://graph.microsoft.com/v1.0/solutions/bookingBusinesses/GatesFamilyOffice@27r4l5.onmicrosoft.com/staffMembers/');
+        'https://graph.microsoft.com/v1.0/solutions/bookingBusinesses/$serviceId/staffMembers/');
     final response =
         await http.get(url, headers: {"Authorization": "Bearer " + ascToken});
 
@@ -535,7 +538,7 @@ class ACSBookingPhonePageState
     final requestString = json.encode(body);
 
     var url = Uri.parse(
-        'https://graph.microsoft.com/v1.0/solutions/bookingBusinesses/GatesFamilyOffice@27r4l5.onmicrosoft.com/appointments');
+        'https://graph.microsoft.com/v1.0/solutions/bookingBusinesses/$serviceId/appointments');
     final response =
     await http.post(url, headers: {"Authorization": "Bearer " + ascToken, "Content-Type": "application/json"}, body: requestString);
     // print("Response code is : "+response.statusCode.toString());
