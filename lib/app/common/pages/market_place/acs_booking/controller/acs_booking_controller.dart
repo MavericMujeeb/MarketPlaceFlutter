@@ -63,9 +63,9 @@ class ACSBookingController extends BaseController {
 
   Future getAwailableSlots(int dayOfWeek) async {
     // inProgress = true;
-    acsToken = await await AppSharedPreference()
+    acsToken = await AppSharedPreference()
         .getString(key: SharedPrefKey.prefs_acs_token);
-    serviceId = await await AppSharedPreference()
+    serviceId = await AppSharedPreference()
         .getString(key: SharedPrefKey.prefs_service_id);
     print("Token from sharedPrefs is : " + acsToken.toString());
     print("Day of week is : " + dayOfWeek.toString());
