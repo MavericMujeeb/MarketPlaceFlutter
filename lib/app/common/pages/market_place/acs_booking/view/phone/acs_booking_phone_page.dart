@@ -12,6 +12,7 @@ import 'package:marketplace/app/common/pages/market_place/my_apps/view/my_apps_p
 import 'package:marketplace/app/widgets/custom_text.dart';
 import 'package:marketplace/data/helpers/shared_preferences.dart';
 import 'package:marketplace/data/repositories/acs_chat_calling_repositories.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 // import 'package:marketplace/data/repositories/acs_chat_calling_repository.dart';
 
 import '../../../../../utils/constants.dart';
@@ -73,24 +74,19 @@ class ACSBookingPhonePageState
   List<String> timeslots = [];
   var splitTime;
 
+  bool isWebView = false;
+  late final WebViewController _controller;
+  var strCodeResaponseURL = '';
+
+  var strGetCodeUrl = 'https://login.microsoftonline.com/4c4985fe-ce8e-4c2f-97e6-b037850b777d/oauth2/v2.0/authorize?response_type=code&client_id=e6197263-b986-4f08-9a27-08a4ec1b5c8e&state=12345&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default&redirect_uri=https%3A%2F%2Foauth.pstmn.io%2Fv1%2Fbrowser-callback';
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
-    // DateTime today = new DateTime.now();
-    // DateTime date = new DateTime(today.year, today.month, today.day);
-
-    // getAwailableSlots(today.weekday - 1);
-
-
-    // acsBookingController?.getAwailableSlots(today.weekday - 1);
-    /*setState(() {
-
-    });*/
-
     getBankersList();
-    // getAppoinments(today.weekday - 1);
+
   }
 
   void getBankersList() async {
@@ -101,9 +97,8 @@ class ACSBookingPhonePageState
     acsBookingController!.selectedBankerEmailId = acsBookingController!
         .respGetBanker['value'][0]['emailAddress']
         .toString();
-    acsBookingController!.selectedBankerId = acsBookingController!
-        .respGetBanker['value'][0]['id']
-        .toString();
+    acsBookingController!.selectedBankerId =
+        acsBookingController!.respGetBanker['value'][0]['id'].toString();
 
     String formattedDate = DateFormat('yyyy-MM-dd').format(today);
     acsBookingController!.defaultDate = formattedDate;
@@ -127,10 +122,41 @@ class ACSBookingPhonePageState
     setState(() {});
   }
 
+  void setWebviewController() {
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar.
+          },
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {
+            print("OnFinished response url is : "+url.toString());
+            if(url.contains('browser-callback?')){
+              strCodeResaponseURL = url.toString();
+              List<String> strSplitURL = strCodeResaponseURL.split("code=");
+              acsBookingController!.strCode = strSplitURL[1];
+
+              print("Code on response is : "+acsBookingController!.strCode.toString());
+
+              isWebView = false;
+
+              bookAnAppointment();
+              setState(() {});
+            }
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse('strGetCodeUrl'));
+  }
+
   bookAnAppointment() async {
-    await acsBookingController!.actionBookAppointment();
+    // await acsBookingController!.actionBookAppointment();
+    await acsBookingController!.getBookingDelegateToken();
     setState(() {});
-    popScreen(context);
+    // popScreen(context);
   }
 
   @override
@@ -145,7 +171,7 @@ class ACSBookingPhonePageState
         ),
         // key: globalKey,
         body: SafeArea(
-          child: bookingContent,
+          child: isWebView ? loadWebView : bookingContent,
           /*child: ControlledWidgetBuilder<ACSBookingController>(
             builder: (context, controller) {
               // acsBookingController = controller;
@@ -153,6 +179,43 @@ class ACSBookingPhonePageState
               return bookingContent;
             },
           ),*/
+        ),
+      );
+
+  Widget get loadWebView => Container(
+        height: double.infinity,
+        width: double.infinity,
+        child: Column(
+          children: [
+            Container(
+              height: 60,
+              width: double.infinity,
+              color: Colors.blueGrey,
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      isWebView = false;
+                      setState(() {});
+                    },
+                    child: Icon(
+                      Icons.cancel_outlined,
+                      size: 40,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Container(
+                color: Colors.white,
+                child: WebViewWidget(controller: _controller),
+              ),
+            ),
+          ],
         ),
       );
 
@@ -204,7 +267,9 @@ class ACSBookingPhonePageState
 
   Widget bottomBookingButton() => GestureDetector(
         onTap: () {
-          bookAnAppointment();
+          setWebviewController();
+          isWebView = true;
+          // bookAnAppointment();
           setState(() {});
         },
         child: customButton(

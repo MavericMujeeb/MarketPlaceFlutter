@@ -34,6 +34,11 @@ dependencies:
   get_storage: ^2.0.3
   font_awesome_flutter: ^10.3.0
   intl: ^0.18.0
+  oauth2: ^2.0.1
+  webview_flutter: ^4.0.2
+#  url_launcher: ^6.1.8
+#  uni_links: ^0.5.1
+#  webview_flutter: ^4.0.2
 #  flutter_js: ^0.6.0
 
 dev_dependencies:

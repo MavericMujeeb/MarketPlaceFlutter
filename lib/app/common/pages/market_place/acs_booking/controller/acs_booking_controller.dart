@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
@@ -7,6 +8,8 @@ import 'package:marketplace/app/common/pages/base/controller/base_controller.dar
 import 'package:marketplace/app/common/utils/constants.dart';
 import 'package:marketplace/data/helpers/shared_preferences.dart';
 import 'package:marketplace/domain/entities/product_dao.dart';
+
+import 'package:oauth2/oauth2.dart' as oauth2;
 
 import 'package:http/http.dart' as http;
 
@@ -31,6 +34,7 @@ class ACSBookingController extends BaseController {
   var pickedEndTime = '';
 
   var defaultDate = '';
+  var strCode = '';
 
   ACSBookingController(super.repo) {}
 
@@ -128,6 +132,46 @@ class ACSBookingController extends BaseController {
     return availableTimeSlotsList;
   }
 
+  Future getBookingDelegateToken() async {
+    inProgressFullScreen = true;
+
+    respBooking = await getBookingDelegateTokenAPI();
+    print("Response for get token is : "+respBooking.toString());
+
+    inProgressFullScreen = false;
+
+    bookAppointAPI();
+
+    return true;
+  }
+
+  Future getBookingDelegateTokenAPI() async {
+    var url = Uri.parse(
+        'https://login.microsoftonline.com/4c4985fe-ce8e-4c2f-97e6-b037850b777d/oauth2/v2.0/token');
+
+    final response = await http.post(
+      url,
+      headers: {
+        // "Authorization": "Basic ZTYxOTcyNjMtYjk4Ni00ZjA4LTlhMjctMDhhNGVjMWI1YzhlOjRrNDhRfndiaXZseGRGSWJ5VmNOZzN5a3VubE5kSS52Y3lDMktiaTA=",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Host": "login.microsoftonline.com",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Connection": "keep-alive",
+        "Content-Length": "928",
+      },
+      body: {
+        "grant_type": "authorization_code",
+        // "code": "0.AXwA_oVJTI7OL0yX5rA3hQt3fWNyGeaGuQhPmicIpOwbXI67AAA.AgABAAIAAAD--DLA3VO7QrddgJg7WevrAgDs_wUA9P9j2q4sbzEII8qjD5V6ipdgvC8fcAUKw6Sykk_F15FM29jG-fUjtvrdUz_i81f-ZnvHgnGaPGDcuofNeWKxe0vp1MRJGRnIfBM5aiE-TUtZEYvE3h7pkMZGNEcYTI2yHCW8DWRHKYRMcYRZuQxMreHRwy8NrZz_xhmJd_ICM8mLtuEaAujXE5LpnsXI6f_moVbwQ107Tuj0usDRZDbin6hUytIM0U4nPWAuzKOOvjyMx34ayAenckByLrHFKM94lftdSecR24HLx05GxzRAOlY1QyRPWxqqDrm3bzwL0_ZCnjMmwwsZ6bWyxbKdSswODYnjMDwMY3dK7tB1ssWKGJbl_SuxcvFLIs76kH2ZAIQiggS0Bp5CCslzXtPrVh_pxWPvRxmKeiROtj8PmVSvDjC5Z-pRzRAJWG8Q4Q9KD48CBXdWtcglAI_Tn5w1UK5kfiUeDe1Ny6n1o4ruhKUNqRRfkAnN9fTXJB1bJy6OoxnCbVhMZjrmPJvDvqNvrgS83TTc5g-1ebSnBb69k-gptB9YlekoD4Spu7ILXWYEyywf8Nbs-J_MwplgY6Ok3VMPgS_9VYcah-VzRdSEv8Zu1jHY5sir-Fywu94BwI-zMG8nDDfRIO8-_N8n7hWsLWPNVSQSqqCc-3C0Q0GqfhXSHCOHOkEDdtNjd1fF2AZTzkdqhtBUOw&state=12345&session_state=de8cd894-ea1a-4010-8961-9fe6c632b746",
+        "code": strCode,
+        "redirect_uri": "https%3A%2F%2Foauth.pstmn.io%2Fv1%2Fbrowser-callback",
+        "client_id": "e6197263-b986-4f08-9a27-08a4ec1b5c8e",
+        "scope": "https://graph.microsoft.com/.default",
+      },
+    );
+
+    var convertDataToJson = jsonDecode(response.body);
+    return convertDataToJson;
+  }
 
   Future actionBookAppointment() async{
     inProgressFullScreen = true;
