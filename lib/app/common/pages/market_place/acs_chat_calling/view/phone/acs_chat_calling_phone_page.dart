@@ -60,7 +60,7 @@ class ACSChatCallingPhonePageState
           elevation: 0,
           toolbarHeight: 70,
           leading: IconButton(
-              onPressed: () => popScreen(context),
+              onPressed: () => null,
               icon: const Icon(Icons.chevron_left)),
           title: appBarTitle,
         ),
