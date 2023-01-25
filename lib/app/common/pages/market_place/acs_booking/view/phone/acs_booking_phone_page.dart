@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -62,6 +63,8 @@ class ACSBookingPhonePageState
 
   // var resp;
   // var respBooking;
+  var getScheduleResponse;
+  var availableTimeSlots;
   var ascToken = '';
   var serviceId = '';
   DateTime today = new DateTime.now();
@@ -113,12 +116,29 @@ class ACSBookingPhonePageState
   }
 
   getAppoinments(int weekday, String date) async {
-    await acsBookingController?.getAwailableSlots(weekday, date);
+    getScheduleResponse = await acsBookingController?.getAwailableSlots(weekday, date);
     // _selected = List.generate(timeslots.length, (i) => false);
-    _selected[0] = true;
+    //_selected[0] = true;
+    availableTimeSlots = getScheduleResponse['value'] != null &&
+        getScheduleResponse['value'].length > 0 &&
+        getScheduleResponse['value'][0]['availabilityView'] != null
+        ? getScheduleResponse['value'][0]['availabilityView'].split('')
+        : "000000000".split('');
+    var startWorkingHr = getScheduleResponse['value'] != null &&
+        getScheduleResponse['value'].length > 0 &&
+        getScheduleResponse['value'][0]['workingHours'] != null &&
+        getScheduleResponse['value'][0]['workingHours']['startTime'] != null
+        ? getScheduleResponse['value'][0]['workingHours']['startTime']
+        : "08:00:00.0000000";
+    var endWorkingHr = getScheduleResponse['value'] != null &&
+        getScheduleResponse['value'].length > 0 &&
+        getScheduleResponse['value'][0]['workingHours'] != null &&
+        getScheduleResponse['value'][0]['workingHours']['endTime'] != null
+        ? getScheduleResponse['value'][0]['workingHours']['endTime']
+        : "17:00:00.0000000";
 
     timeslots = acsBookingController!
-        .getTimeSlotsToDisplay("08:00:00.0000000", "17:00:00.0000000");
+        .getTimeSlotsToDisplay(startWorkingHr, endWorkingHr);
 
     var parts = timeslots[0].split('-');
     acsBookingController!.pickedStartTime = parts[0].trim();
@@ -130,7 +150,7 @@ class ACSBookingPhonePageState
   bookAnAppointment() async {
     await acsBookingController!.actionBookAppointment();
     setState(() {});
-    popScreen(context);
+    //popScreen(context);
   }
 
   @override
@@ -408,14 +428,26 @@ class ACSBookingPhonePageState
 
   Widget slotCellItem(int index) => GestureDetector(
         onTap: () => {
-          for (int i = 0; i < 10; i++) {setState(() => _selected[i] = false)},
-          setState(() => _selected[index] = true),
-          splitTime = timeslots[0].split('-'),
-          acsBookingController!.pickedStartTime = splitTime[0].trim(),
-          acsBookingController!.pickedEndTime = splitTime[1].trim(),
+          if(int.parse(availableTimeSlots[index])!=0) {
+          //Handle event for time slots not available
+          } else {
+            //Handle event for time slots available
+              for (int i = 0; i < 10; i++) {
+                setState(() => _selected[i] = false)
+              },
+              setState(() => _selected[index] = true),
+              splitTime = timeslots[0].split('-'),
+              acsBookingController!.pickedStartTime = splitTime[0].trim(),
+              acsBookingController!.pickedEndTime = splitTime[1].trim(),
+            }
         },
         child: Card(
-          color: _selected[index] ? AppColor.brown_231d18 : Colors.white,
+          color: availableTimeSlots != null
+              && availableTimeSlots.length > 0
+              && int.parse(availableTimeSlots[index])!=0
+              ? AppColor.grey_color_300 : _selected[index]
+              ? AppColor.brown_231d18
+              : Colors.white,
           elevation: 2.0,
           margin: EdgeInsets.only(top: spacing_10),
           shadowColor: Colors.black,
@@ -432,7 +464,13 @@ class ACSBookingPhonePageState
               textAlign: TextAlign.center,
               fontSize: 14,
               fontWeight: FontWeight.w300,
-              textColor: _selected[index] ? Colors.white : Colors.black,
+              textColor: availableTimeSlots != null
+                  && availableTimeSlots.length >0
+                  && int.parse(availableTimeSlots[index])!=0
+                  ? Colors.black
+                  : _selected[index]
+                  ? Colors.white
+                  : Colors.black,
             ),
           ),
         ),
