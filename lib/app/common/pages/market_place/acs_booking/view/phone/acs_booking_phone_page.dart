@@ -143,7 +143,7 @@ class ACSBookingPhonePageState
     var parts = timeslots[0].split('-');
     acsBookingController!.pickedStartTime = parts[0].trim();
     acsBookingController!.pickedEndTime = parts[1].trim();
-
+    refreshTimeSlotsUI(-1);
     setState(() {});
   }
 
@@ -432,10 +432,7 @@ class ACSBookingPhonePageState
           //Handle event for time slots not available
           } else {
             //Handle event for time slots available
-              for (int i = 0; i < 10; i++) {
-                setState(() => _selected[i] = false)
-              },
-              setState(() => _selected[index] = true),
+              refreshTimeSlotsUI(index),
               splitTime = timeslots[0].split('-'),
               acsBookingController!.pickedStartTime = splitTime[0].trim(),
               acsBookingController!.pickedEndTime = splitTime[1].trim(),
@@ -554,6 +551,15 @@ class ACSBookingPhonePageState
     var strEndTime = formatter_display_time.format(tempEndTimeFormat);
 
     return strStartTime + " - " + strEndTime;
+  }
+
+  void refreshTimeSlotsUI(int index) {
+    for (int i = 0; i < 10; i++) {
+      setState(() => _selected[i] = false);
+    }
+    if (index >= 0) {
+      setState(() => _selected[index] = true);
+    }
   }
 
   @override
